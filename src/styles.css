@@ -1,0 +1,90 @@
+/* Reset styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f3f3f3;
+  color: #333;
+}
+
+/* Header styles */
+header {
+  background-color: #4a90e2;
+  padding: 15px;
+  text-align: center;
+  color: #fff;
+}
+
+.title {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 18px;
+}
+
+/* Main section styles */
+main {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Form styles */
+form {
+  width: 60%;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="file"],
+select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+input[type="submit"].run-button {
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+input[type="submit"].run-button:hover {
+  background-color: #3682c3;
+}
+
+/* Console section styles */
+.console-section {
+  width: 35%;
+  background-color: #1c1c1c;
+  color: #fff;
+  padding: 20px;
+  overflow: auto; /* Activer le débordement automatique en cas de contenu dépassant */
+  max-height: 400px; /* Hauteur maximale de la boîte de la console */
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+}
+
+
+/* Hidden field styles */
+.hidden {
+  display: none;
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>ProteoTrace</title>
+  <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>ProteoTrace</h1>
+      <p class="subtitle">Easily read and interpret proteomics results</p>
+    </header>
+    <main>
+      <form id="msForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="tool">Select a tool:</label>
+        <select id="tool" name="tool" onchange=toggleField() required>
+          <option value="Proline" selected>Proline</option>
+          <option value="Ionbot">Ionbot</option>
+          <option value="Maxquant">Maxquant</option>
+        </select>
+        <br>
+
+        <div id="file_result" style="display: none;">
+          <label for="file_result">Select the excel result file</label>
+          <input type="file" id="file_result" name="file_result" title="load" accept=".xlsx">
+        </div>
+
+        <div id="folder_result" style="display: none;">
+          <label for="folder_result">Select the result repository</label>
+          <input type="file" id="folder_result" name="folder_result" title="load" webkitdirectory directory>
+        </div>
+
+        <label for="file_database">Select the database file (fasta)</label>
+        <input type="file" id="file_database" name="file_database" title="load" accept=".fasta, .faa, .fa">
+
+        <input type="submit" value="Run" class="run-button">
+      </form>
+
+      <section id="terminal" class="console-section">
+    </main>
+    <footer>
+      &copy; 2023 ProteoTrace
+    </footer>
+    <script type='text/javascript' src="./renderer.js"></script>
+  </body>
+</html>
+
