@@ -94,6 +94,11 @@ app.whenReady().then(() => {
   ipcMain.handle('click-submit', async (event, formDataObject) => {
     console.log('Received form data in ipcMain:', formDataObject);
     const terminalOutput = await executeScript(formDataObject);
+
+    // Rediriger vers la page d'infos une fois l'exécution terminée
+    const mainWindow = BrowserWindow.getFocusedWindow();
+    mainWindow.loadFile(path.join(__dirname, 'infos.html'));
+
     return terminalOutput;
   });
 

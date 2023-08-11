@@ -33,6 +33,10 @@ msForm.addEventListener('submit', async (event) => {
 
     // Affiche la sortie du terminal dans la div de terminal
     terminalDiv.innerText = terminalOutput;
+
+    // Réinitialiser le formulaire
+    msForm.reset();
+
   } catch (error) {
     // En cas d'erreur, affiche le message d'erreur dans la div de terminal
     terminalDiv.innerText = `An error occurred: ${error.message}\n\n${JSON.stringify(error, null, 2)}`;

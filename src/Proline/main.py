@@ -1,5 +1,5 @@
 from Proline import Proline
-import pickle, json
+import pickle
 import argparse
 import random, string
 
@@ -13,18 +13,18 @@ args = parser.parse_args()
 excel_file_path = args.r
 fasta_file = args.f
 random_suffix = ''.join(random.choices(string.digits, k=4))
-output_file = f"tmp/Proline_proteotrace_{random_suffix}.json"
+output_file = f"tmp/Proline_proteotrace_{random_suffix}.pkl"
 
 proline = Proline(excel_file_path, fasta_file)
 
-# Sauvegarder l'objet proline dans un fichier JSON en utilisant pickle
-with open(output_file, 'wb') as json_file:
-    pickle.dump(proline, json_file)
+# Sauvegarder l'objet proline dans un fichier pkl en utilisant pickle
+with open(output_file, 'wb') as pkl_file:
+    pickle.dump(proline, pkl_file)
 
 
-# Pour charger l'objet proline depuis le fichier JSON
-with open(output_file, 'rb') as json_file:
-    loaded_proline = pickle.load(json_file)
+# Pour charger l'objet proline depuis le fichier pkl
+with open(output_file, 'rb') as pkl_file:
+    loaded_proline = pickle.load(pkl_file)
 
 loaded_database = loaded_proline.sequences
 loaded_protein_ids = [sequence["id"] for sequence in loaded_database]
