@@ -1,45 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>ProteoTrace</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="index.css" />
   </head>
   <body>
     <header>
       <h1>ProteoTrace</h1>
-      <p class="subtitle">Easily read and interpret proteomics results</p>
+      <p>Easily read and interpret proteomics results</p>
     </header>
     <main>
-      <form id="msForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required><br>
-
-        <label for="tool">Select a tool:</label>
-        <select id="tool" name="tool" onchange=toggleField() required>
-          <option value="Proline" selected>Proline</option>
-          <option value="Ionbot">Ionbot</option>
-          <option value="Maxquant">Maxquant</option>
-        </select>
-        <br>
-
-        <div id="file_result" style="display: none;">
-          <label for="file_result">Select the excel result file</label>
-          <input type="file" id="file_result" name="file_result" title="load" accept=".xlsx">
+      <div class="main-content">
+        <form class="msForm" id="msForm">
+          <h2>Select your MS analysis</h2>
+          <div class="form-field">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-field">
+            <label for="tool">Select a tool:</label>
+            <select id="tool" name="tool" onchange=toggleField() required>
+              <option value="Proline" selected>Proline</option>
+              <option value="Ionbot">Ionbot</option>
+              <option value="Maxquant">Maxquant</option>
+            </select>
+          </div>
+          <div class="form-field" id="file_result">
+            <label for="file_result">Select the excel result file</label>
+            <input type="file" id="file_result" name="file_result" title="load" accept=".xlsx">
+          </div>
+          <div class="form-field" id="folder_result">
+            <label for="folder_result">Select the result repository</label>
+            <input type="file" id="folder_result" name="folder_result" title="load" webkitdirectory directory>
+          </div>
+          <div class="form-field">
+            <label for="file_database">Select the database file (fasta)</label>
+            <input type="file" id="file_database" name="file_database" title="load" accept=".fasta, .faa, .fa">
+          </div>
+            <input class="run-btn" type="submit" value="Run">
+        </form>
+        <div class="loaded-analysis-box">
+          <h2>Loaded analysis</h2>
+          <ul id="loaded-analysis"></ul>
+          <li>Adrien</li>
+          <li>Bastien</li>
         </div>
-
-        <div id="folder_result" style="display: none;">
-          <label for="folder_result">Select the result repository</label>
-          <input type="file" id="folder_result" name="folder_result" title="load" webkitdirectory directory>
+      </div>
+      
+      <div class="dialog-box">
+        <div class="dialog-box-content">
+          <p>Your MS analysis has been loaded successfully</p>
+          <button>OK</button>
         </div>
+      </div>
+      <div id="window" class="window">
+        <span>Loading ...</span>
+      </div>
 
-        <label for="file_database">Select the database file (fasta)</label>
-        <input type="file" id="file_database" name="file_database" title="load" accept=".fasta, .faa, .fa">
-
-        <input type="submit" value="Run" class="run-button">
-      </form>
-
-      <section id="terminal" class="console-section">
     </main>
     <footer>
       &copy; 2023 ProteoTrace
