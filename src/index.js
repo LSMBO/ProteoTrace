@@ -32,6 +32,15 @@ const createWindow = () => {
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
+
+  ipcMain.on('open-coverage-page', (event, selectedAnalysis) => {
+    mainWindow.loadFile(
+      path.join(__dirname, 'coverage.html'), 
+      { 
+        query: { selectedAnalysis: JSON.stringify(selectedAnalysis) } 
+      }
+    );
+  });
 };
 
 // Fonction pour exécuter le script Python avec les arguments spécifiés
@@ -47,8 +56,6 @@ const runPythonScript = (formData) => {
     } else if (formData.tool === 'Ionbot' || formData.tool === 'Maxquant') {
       result = formData.folder_result;
     }
-
-
 
     const scriptPath = path.join(__dirname, 'main.py');
 
@@ -94,9 +101,9 @@ app.whenReady().then(() => {
   ipcMain.handle('click-submit', async (event, formDataObject) => {
     console.log('Received form data in ipcMain:', formDataObject);
     const terminalOutput = await executeScript(formDataObject);
-
     return terminalOutput;
   });
+  
 
   createWindow();
 

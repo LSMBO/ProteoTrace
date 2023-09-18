@@ -15,7 +15,9 @@
   "author": "Brown.Adrien",
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "jquery": "^3.7.1",
+    "select2": "^4.1.0-rc.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.1.1",
@@ -26,4 +28,3 @@
     "electron": "22.0.0"
   }
 }
-

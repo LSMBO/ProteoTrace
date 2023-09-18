@@ -3,6 +3,16 @@ const msForm = document.getElementById('msForm');
 const loadedAnalysisDiv = document.getElementById('loaded-analysis');
 const dialogBox = document.querySelector('.dialog-box');
 const dialogBoxOkButton = document.querySelector('.dialog-box-content button');
+const coverageBtn = document.getElementById('coverage-nav-btn');
+const ptmsBtn = document.getElementById('ptms-nav-btn');
+let selectedAnalysis = null;
+let loadedAnalysisIdList = []
+
+
+coverageBtn.addEventListener('click', () => {
+  window.electronAPI.openCoveragePage(selectedAnalysis);
+});
+
 
 // Appelle la fonction toggleField() lors du chargement initial de la page
 document.addEventListener('DOMContentLoaded', toggleField);
@@ -34,6 +44,12 @@ msForm.addEventListener('submit', async (event) => {
 
     // Appelle la fonction 'clickSubmit' du processus principal (index.js) en passant les données du formulaire
     const terminalOutput = await window.electronAPI.clickSubmit(formDataObject);
+    console.log(terminalOutput)
+    const runId = terminalOutput
+      .split('\n')
+      .filter(line => line.startsWith('RUN_ID='))
+      .map(line => line.split('=')[1])
+      .join('');
 
     // Cacher le chargement une fois que l'exécution est terminée
     hideLoading();
@@ -41,12 +57,8 @@ msForm.addEventListener('submit', async (event) => {
     // Afficher une boîte de dialogue de succès
     showSuccessDialog();
 
-    // Créer un nouvel élément li avec le nom de l'analyse
-    const newListItem = document.createElement('li');
-    newListItem.textContent = formDataObject.name;
-
-    // Ajouter le nouvel élément à la liste
-    loadedAnalysisDiv.appendChild(newListItem);
+    // Appeler la fonction pour ajouter un nouvel élément à la liste
+    addNewAnalysisToList(formDataObject.name, formDataObject.tool, runId);
 
     // Réinitialiser le formulaire
     msForm.reset();
@@ -58,10 +70,53 @@ msForm.addEventListener('submit', async (event) => {
   }
 });
 
+
+// Lorsque vous ajoutez un nouvel élément <li> à la liste
+function addNewAnalysisToList(name, tool, run_id) {
+  const analysisSelection = document.querySelectorAll('.loaded-analysis-box ul li');
+  const newListItem = document.createElement('li');
+  newListItem.textContent = `${name} (${tool})`;
+  newListItem.setAttribute('data-analysis-id', run_id);
+  
+  // Attachez le gestionnaire d'événements 'click' à ce nouvel élément <li>
+  newListItem.addEventListener('click', () => {
+    const isSelected = newListItem.classList.contains('analysis_selected');
+    
+    analysisSelection.forEach((otherLi) => {
+      if (newListItem != otherLi) {
+        otherLi.classList.remove('analysis_selected');
+      }
+    });
+    
+    if (!isSelected) {
+      newListItem.classList.add('analysis_selected');
+      const selectedAnalysisId = newListItem.getAttribute('data-analysis-id');
+      selectedAnalysis = loadedAnalysisIdList.find((analysis) => analysis.id === selectedAnalysisId);
+      coverageBtn.disabled = false;
+      ptmsBtn.disabled = false;
+    }
+    
+    if (isSelected) {
+      newListItem.classList.remove('analysis_selected');
+      coverageBtn.disabled = true;
+      ptmsBtn.disabled = true;
+    }
+  });
+  
+  loadedAnalysisDiv.appendChild(newListItem);
+  loadedAnalysisIdList.push(
+    {
+      'id' : run_id,
+      'name' : name,
+      'tool' : tool
+    }
+  );
+}
+
+
 dialogBoxOkButton.addEventListener('click', () => {
   dialogBox.style.display = 'none';
   const mainDiv = document.getElementById('window');
-  // Masquer la div window grise
   mainDiv.style.display = 'none';
 });
 

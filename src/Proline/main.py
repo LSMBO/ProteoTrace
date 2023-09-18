@@ -13,22 +13,31 @@ args = parser.parse_args()
 excel_file_path = args.r
 fasta_file = args.f
 random_suffix = ''.join(random.choices(string.digits, k=4))
-output_file = f"tmp/Proline_proteotrace_{random_suffix}.pkl"
+output_file_pkl = f"tmp/Proline_proteotrace_{random_suffix}.pkl"
+output_file_txt = f"tmp/Proline_proteotrace_protein_list_{random_suffix}.txt"
 
 proline = Proline(excel_file_path, fasta_file)
-
 # Sauvegarder l'objet proline dans un fichier pkl en utilisant pickle
-with open(output_file, 'wb') as pkl_file:
+with open(output_file_pkl, 'wb') as pkl_file:
     pickle.dump(proline, pkl_file)
+    
+protein_ids_identified = [protein.id for protein in proline.proteins]
 
+database = proline.sequences
+protein_ids_all = [sequence["id"] for sequence in database]
+protein_description_all = [sequence["description"] for sequence in database]
+
+# Ouvrez le fichier texte en écriture
+with open(output_file_txt, 'w') as output_file:
+    # Écrivez chaque identifiant de protéine sur une ligne distincte dans le fichier
+    for protein_description in protein_description_all:
+        output_file.write(f"{protein_description}\n")
+
+print(f"RUN_ID={random_suffix}")
 
 # Pour charger l'objet proline depuis le fichier pkl
-with open(output_file, 'rb') as pkl_file:
-    loaded_proline = pickle.load(pkl_file)
-
-loaded_database = loaded_proline.sequences
-loaded_protein_ids = [sequence["id"] for sequence in loaded_database]
-loaded_protein_description = [sequence["description"] for sequence in loaded_database]
+# with open(output_file_pkl, 'rb') as pkl_file:
+#     loaded_proline = pickle.load(pkl_file)
 
 
 

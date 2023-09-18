@@ -15,7 +15,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
       // En cas d'erreur, rejet de la promesse avec le message d'erreur
       throw new Error(`An error occurred: ${error.message}`);
     }
-  }
+  },
+  openCoveragePage: (selectedAnalysis) => {
+    ipcRenderer.send('open-coverage-page', selectedAnalysis);
+  },
 });
 
 window.addEventListener('DOMContentLoaded', () => {

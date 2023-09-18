@@ -1,21 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Coverage</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coverage</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Coverage</h1>
-  </header>
-  <main>
-    <button id="backButton"><img src="../icons/back.png" alt="back"></button>
-    <div>coverage main</div>
-  </main>
-  <footer>
-    &copy; 2023 ProteoTrace
-  </footer>
-  <script type='text/javascript' src="./coverage.js"></script>
+    <h1>Coverage Page</h1>
+    <div class="runID"></div>
+    <select class="proteinInput" type="text" id="proteinInput" placeholder="Search a protein">
 </body>
+<script type="module" src="coverage.js"></script>
 </html>

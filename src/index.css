@@ -52,6 +52,8 @@ h2 {
     margin: 10px auto 10px 20px;
     padding: 8px;
     border-radius: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-field {
@@ -131,7 +133,7 @@ h2 {
     height: 100%;
 }
 
-.dialog-box-content button {
+button {
     padding: 4px;
     width: 20%;
     border: 0.5px;
@@ -143,9 +145,10 @@ h2 {
     cursor: pointer;
 }
 
-.dialog-box-content button:hover {
+button:hover {
     background-color: #fa4b3b;
 }
+
 
 .loaded-analysis-box li {
     list-style: inside;
@@ -158,4 +161,28 @@ h2 {
 
 .loaded-analysis-box li:hover {
     background-color: #FFDCE2;
+}
+
+.nav-btn {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: auto;
+}
+
+.loaded-analysis-box button:disabled {
+    width: 40%;
+    background-color: #A8A8A8;
+    cursor: auto;
+}
+
+.loaded-analysis-box button {
+    width: 40%;
+}
+
+.analysis_selected {
+    background-color: #FFDCE2; /* Style de fond pour les éléments sélectionnés */
+  }
+
+#proteinInput {
+  width: 95%;
 }
