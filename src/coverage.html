@@ -9,9 +9,30 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
-    <h1>Coverage Page</h1>
-    <div class="runID"></div>
-    <select class="proteinInput" type="text" id="proteinInput" placeholder="Search a protein">
+  <header>
+    <a class="back-button" href="index.html">
+        <img src="../assets/icons/back.png" alt="Back" />
+    </a>
+    <div class="title-subtitle">
+      <h1>Coverage Page</h1>
+      <div class="runID"></div>
+    </div>
+    <div class="forward-button" href="index.html">
+      <img src="../assets/icons/forward.png" alt="Forward"/>
+    </div>
+
+  </header>
+  <main>
+    <div class="select-container">
+        <label for="proteinInput">Select a protein:</label>
+        <select class="proteinInput" type="text" id="proteinInput" placeholder="Search a protein"></select>
+    </div>
+  </main>
+  <footer>
+    &copy; 2023 ProteoTrace
+  </footer>
 </body>
+
+
 <script type="module" src="coverage.js"></script>
 </html>

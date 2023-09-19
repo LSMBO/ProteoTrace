@@ -16,15 +16,39 @@ body {
     background-color: #FEF1F6;
     font-family: "Oxygen", sans-serif;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
 
 header {
     width: 60%;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
     margin: 8px auto;
     border: 5px solid #FF6F61;
     border-radius: 20px;
     text-align: center;
     padding-bottom: 8px;
+}
+
+header .title-subtitle {
+    display: flex;
+    flex-direction: column;
+    margin: 8px auto;
+}
+main {
+    flex-grow: 1;
+    background: linear-gradient(to top, #FEABA3, transparent 3%, transparent);
+
+}
+
+footer {
+    background-color: #FEABA3;
+    color: white;
+    text-align: center;
+    padding: 10px;
 }
 
 .main-content {
@@ -183,6 +207,30 @@ button:hover {
     background-color: #FFDCE2; /* Style de fond pour les éléments sélectionnés */
   }
 
-#proteinInput {
-  width: 95%;
+.select-container {
+    text-align: center;
+    margin: 20px auto; /* Vous pouvez ajuster la marge comme vous le souhaitez */
 }
+
+#proteinInput {
+    width: 95%;
+}
+
+
+.back-button {
+    display: inline-block;
+    background-color: transparent;
+    transition: opacity 0.3s ease;
+}
+
+.back-button img, .forward-button img {
+    width: 50px;
+    height: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.back-button:hover {
+    opacity: 0.8;
+}
+

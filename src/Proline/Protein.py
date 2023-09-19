@@ -61,6 +61,7 @@ class Protein:
         identified_coordinates = self.merge_coordinate(identified_coordinates)
         return identified_coordinates
     
+    
     def get_sequence_coverage(self, output_file=None):
         sequence = self.sequence
         coords = self.get_sequence_coverage_coordinates()

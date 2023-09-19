@@ -12,12 +12,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
       const terminalOutput = await ipcRenderer.invoke('click-submit', args);
       return terminalOutput;
     } catch (error) {
-      // En cas d'erreur, rejet de la promesse avec le message d'erreur
       throw new Error(`An error occurred: ${error.message}`);
     }
   },
   openCoveragePage: (selectedAnalysis) => {
     ipcRenderer.send('open-coverage-page', selectedAnalysis);
+  },
+  getCoverage: async (args) => {
+    try {
+      const terminalOutput = await ipcRenderer.invoke('get-coverage', args);
+      return terminalOutput;
+    }
+    catch (error) {
+      throw new Error(`An error occurred: ${error.message}`);
+    }
   },
 });
 

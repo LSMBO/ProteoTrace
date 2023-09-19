@@ -4,48 +4,101 @@ import argparse
 import random, string
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-r', help='Proline excel output file', required=True)
-parser.add_argument('-f', help='Database used in the identification search', required=True)
-#parser.add_argument('-id', help='Protein id', required=False, action='append')
-#parser.add_argument('-o', help='Output file name', required=False)
+parser.add_argument('-r', help='Proline excel output file')
+parser.add_argument('-f', help='Database used in the identification search')
+parser.add_argument('-runID', help='Run id')
+parser.add_argument('--protein-descriptions', help='Protein id', action='append')
 args = parser.parse_args()
 
-excel_file_path = args.r
-fasta_file = args.f
-random_suffix = ''.join(random.choices(string.digits, k=4))
-output_file_pkl = f"tmp/Proline_proteotrace_{random_suffix}.pkl"
-output_file_txt = f"tmp/Proline_proteotrace_protein_list_{random_suffix}.txt"
+def strip_list(input_list):
+    new_list = []
+    for i in input_list:
+        new_list.append(i[1:-2])
+    return new_list
 
-proline = Proline(excel_file_path, fasta_file)
-# Sauvegarder l'objet proline dans un fichier pkl en utilisant pickle
-with open(output_file_pkl, 'wb') as pkl_file:
-    pickle.dump(proline, pkl_file)
+if (args.r and args.f):
+    excel_file_path = args.r
+    fasta_file = args.f
+    random_suffix = ''.join(random.choices(string.digits, k=4))
+    output_file_pkl = f"tmp/Proline_proteotrace_{random_suffix}.pkl"
+    output_file_txt = f"tmp/Proline_proteotrace_protein_list_{random_suffix}.txt"
+
+    proline = Proline(excel_file_path, fasta_file)
+    with open(output_file_pkl, 'wb') as pkl_file:
+        pickle.dump(proline, pkl_file)
+        
+    # Sauvegarder chaque objet Protein dans un fichier pkl
+    for protein in proline.proteins:
+        protein_id = protein.id.replace('|', '##')
+        pkl_file = f"tmp/Proline_proteotrace_{random_suffix}_Protein={protein_id}.pkl"
+        with open(pkl_file, 'wb') as pkl_file:
+            pickle.dump(protein, pkl_file)
+            
+    # Sauvegarder chaque objet Peptide dans un fichier pkl
+    for peptide in proline.peptides:
+        peptide_id = peptide.id
+        pkl_file = f"tmp/Proline_proteotrace_{random_suffix}_Peptide={peptide_id}.pkl"
+        with open(pkl_file, 'wb') as pkl_file:
+            pickle.dump(peptide, pkl_file)
+
+    # Sauvegarder chaque objet ProteinGroup dans un fichier pkl
+    for protein_group in proline.protein_groups:
+        protein_group_id = protein_group.id
+        pkl_file = f"tmp/Proline_proteotrace_{random_suffix}_ProteinGroup={protein_group_id}.pkl"
+        with open(pkl_file, 'wb') as pkl_file:
+            pickle.dump(protein_group, pkl_file)
     
-protein_ids_identified = [protein.id for protein in proline.proteins]
-
-database = proline.sequences
-protein_ids_all = [sequence["id"] for sequence in database]
-protein_description_all = [sequence["description"] for sequence in database]
-
-# Ouvrez le fichier texte en écriture
-with open(output_file_txt, 'w') as output_file:
-    # Écrivez chaque identifiant de protéine sur une ligne distincte dans le fichier
-    for protein_description in protein_description_all:
-        output_file.write(f"{protein_description}\n")
-
-print(f"RUN_ID={random_suffix}")
-
-# Pour charger l'objet proline depuis le fichier pkl
-# with open(output_file_pkl, 'rb') as pkl_file:
-#     loaded_proline = pickle.load(pkl_file)
-
-
-
-# for prot_id in protein_id_list:
-#     for protein in proline.proteins:
-#         if protein.id == prot_id:
-#             protein.get_sequence_coverage(output_file=output_file)
-#             #protein.get_coverage_stats()
-
-# print(f"The Proline Proteotrace run is completed. The results are in {output_file}")
+    # Sauvegarde la liste des proteines du fasta dans un fichier tmp
+    database = proline.sequences
+    protein_description_all = [sequence["description"] for sequence in database]
+    print(f"RUN_ID={random_suffix}")
+    with open(output_file_txt, 'w') as output_file:
+        for protein_description in protein_description_all:
+            output_file.write(f"{protein_description}\n")
     
+elif (args.runID):
+    args.runID = args.runID[:-2]
+    args.protein_descriptions = strip_list(args.protein_descriptions)
+    pkl_file = f"tmp/Proline_proteotrace_{args.runID}.pkl"
+    with open(pkl_file, 'rb') as pkl_file:
+        proline = pickle.load(pkl_file)
+
+    # Charger les objets Protein depuis les fichiers pkl
+    loaded_proteins = []
+    for protein in proline.proteins:
+        protein_id = protein.id.replace('|', '##')
+        pkl_file = f"tmp/Proline_proteotrace_{args.runID}_Protein={protein_id}.pkl"
+        with open(pkl_file, 'rb') as pkl_file:
+            loaded_protein = pickle.load(pkl_file)
+        loaded_proteins.append(loaded_protein)
+    
+    # Charger les objets Peptide depuis les fichiers pkl
+    loaded_peptides = []
+    for peptide in proline.peptides:
+        peptide_id = peptide.id
+        pkl_file = f"tmp/Proline_proteotrace_{args.runID}_Peptide={peptide_id}.pkl"
+        with open(pkl_file, 'rb') as pkl_file:
+            loaded_peptide = pickle.load(pkl_file)
+        loaded_peptides.append(loaded_peptide)
+
+    # Charger les objets ProteinGroup depuis les fichiers pkl
+    loaded_protein_groups = []
+    for protein_group in proline.protein_groups:
+        protein_group_id = protein_group.id
+        pkl_file = f"tmp/Proline_proteotrace_{args.runID}_ProteinGroup={protein_group_id}.pkl"
+        with open(pkl_file, 'rb') as pkl_file:
+            loaded_protein_group = pickle.load(pkl_file)
+        loaded_protein_groups.append(loaded_protein_group)
+
+    for protein_description in args.protein_descriptions:
+        found = False
+        for loaded_protein in loaded_proteins:
+            if loaded_protein.description == protein_description:
+                found = True
+                loaded_protein_transformed_id = loaded_protein.id.replace('|', '##')
+                loaded_protein.get_sequence_coverage(f"tmp/Proline_proteotrace_{args.runID}_{loaded_protein_transformed_id}_coverage.txt")
+                break
+        if found:
+            print(f"LOG={protein_description}@@IDENTIFIED=TRUE")
+        else:
+            print(f"LOG={protein_description}@@IDENTIFIED=FALSE")

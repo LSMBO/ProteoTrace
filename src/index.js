@@ -44,7 +44,7 @@ const createWindow = () => {
 };
 
 // Fonction pour exécuter le script Python avec les arguments spécifiés
-const runPythonScript = (formData) => {
+const runPythonScriptMain = (formData) => {
   return new Promise((resolve, reject) => {
     const name = formData.name;
     const tool = formData.tool;
@@ -84,11 +84,65 @@ const runPythonScript = (formData) => {
   });
 };
 
+const runPythonScriptGetCoverage = (data) => {
+  return new Promise((resolve, reject) => {
+    const selectedProteinDescriptions = data.selectedProteinDescriptions || []; // Utilisez un tableau vide par défaut
+    const tool = data.tool;
+    const runID = data.runID;
+    console.log(data)
+    const scriptPath = path.join(__dirname, 'main.py');
+
+    // Créez un tableau pour stocker les arguments
+    const pythonArgs = [
+      scriptPath,
+      `--runID=${runID}`,
+      `--tool=${tool}`,
+    ];
+
+    // Ajoutez l'argument pour chaque description de protéine sélectionnée
+    selectedProteinDescriptions.forEach((description) => {
+      pythonArgs.push(`--protein-descriptions="${description}"`);
+    });
+
+    // Exécutez le script Python avec les arguments spécifiés
+    const pythonProcess = spawn('python', pythonArgs);
+
+    // Initialisez une variable pour stocker la sortie du terminal
+    let terminalOutput = '';
+
+    // Événement pour gérer les données renvoyées par le processus Python (stdout)
+    pythonProcess.stdout.on('data', (data) => {
+      terminalOutput += data.toString();
+    });
+
+    // Événement pour gérer les erreurs renvoyées par le processus Python (stderr)
+    pythonProcess.stderr.on('data', (data) => {
+      terminalOutput += data.toString();
+    });
+
+    // Événement pour gérer la fermeture du processus Python (code de sortie)
+    pythonProcess.on('close', (code) => {
+      terminalOutput += `Script execution finished with code ${code}`;
+      // Résout la promesse avec la sortie du terminal
+      resolve(terminalOutput);
+    });
+  });
+};
+
 
 // Fonction pour gérer l'exécution du script Python avec les données du formulaire
-async function executeScript(formDataObject) {
+async function executeScriptMain(formDataObject) {
   try {
-    const terminalOutput = await runPythonScript(formDataObject);
+    const terminalOutput = await runPythonScriptMain(formDataObject);
+    return terminalOutput;
+  } catch (error) {
+    throw new Error(`An error occurred: ${error.message}`);
+  }
+}
+
+async function executeScriptGetCoverage(data) {
+  try {
+    const terminalOutput = await runPythonScriptGetCoverage(data);
     return terminalOutput;
   } catch (error) {
     throw new Error(`An error occurred: ${error.message}`);
@@ -99,11 +153,16 @@ async function executeScript(formDataObject) {
 app.whenReady().then(() => {
   // Définir le gestionnaire pour l'événement 'click-submit' ici
   ipcMain.handle('click-submit', async (event, formDataObject) => {
-    console.log('Received form data in ipcMain:', formDataObject);
-    const terminalOutput = await executeScript(formDataObject);
+    const terminalOutput = await executeScriptMain(formDataObject);
     return terminalOutput;
   });
-  
+
+  // Définir le gestionnaire pour l'événement 'get-coverage' ici
+  ipcMain.handle('get-coverage', async (event, args) => {
+    // Placez ici la logique pour obtenir la couverture (coverage)
+    const terminalOutput = await executeScriptGetCoverage(args);
+    return terminalOutput;
+  });
 
   createWindow();
 
@@ -114,32 +173,29 @@ app.whenReady().then(() => {
 
 
 
+
 // Quitte l'application lorsque toutes les fenêtres sont fermées (sauf sur macOS)
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin') {
     // Supprimer tous les fichiers du répertoire tmp/
     const tmpDir = path.join(__dirname, '../tmp');
     
-    fs.readdir(tmpDir, (err, files) => {
-      if (err) {
-        console.error('Erreur lors de la lecture du répertoire tmp/', err);
-        app.quit();
-        return;
-      }
-
-      files.forEach(file => {
+    try {
+      const files = await fs.promises.readdir(tmpDir);
+      
+      for (const file of files) {
         const filePath = path.join(tmpDir, file);
-        fs.unlink(filePath, err => {
-          if (err) {
-            console.error(`Erreur lors de la suppression du fichier ${filePath}`, err);
-          }
-        });
-      });
+        await fs.promises.unlink(filePath);
+      }
       
       app.quit();
-    });
+    } catch (err) {
+      console.error('Erreur lors de la suppression des fichiers temporaires :', err);
+      app.quit();
+    }
   }
 });
+
 
 
 // Recrée une fenêtre lorsque l'icône de l'application est cliquée et aucune fenêtre n'est ouverte (sur macOS)

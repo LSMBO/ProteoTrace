@@ -29,12 +29,10 @@ msForm.addEventListener('submit', async (event) => {
   if (formDataObject.tool === 'Proline') {
     formDataObject.file_result = formDataObject.file_result.path;
     formDataObject.folder_result = null; 
-    console.log(formDataObject.file_result);  
   } 
   
   else if (formDataObject.tool === 'Ionbot' || formDataObject.tool === 'Maxquant') {
     formDataObject.folder_result = formDataObject.folder_result.path.split('\\').slice(0, -1).join('\\');
-    console.log(formDataObject.folder_result);
     formDataObject.file_result = null;
   }
 
