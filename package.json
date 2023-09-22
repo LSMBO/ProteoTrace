@@ -9,12 +9,17 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "keywords": [],
   "author": "Brown.Adrien",
   "license": "MIT",
   "dependencies": {
+    "electron-packager": "^17.1.2",
     "electron-squirrel-startup": "^1.0.0",
     "jquery": "^3.7.1",
     "select2": "^4.1.0-rc.0"
@@ -25,6 +30,22 @@
     "@electron-forge/maker-rpm": "^6.1.1",
     "@electron-forge/maker-squirrel": "^6.1.1",
     "@electron-forge/maker-zip": "^6.1.1",
-    "electron": "22.0.0"
+    "electron": "22.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "build": {
+    "appId": "com.example.yourapp",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

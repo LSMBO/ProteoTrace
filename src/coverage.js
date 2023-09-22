@@ -5,6 +5,9 @@ const proteinInput = $('#proteinInput');
 const backButton = document.querySelector('.back-button');
 let loadedAnalysisIdList = [];
 let selectedAnalysis = null;
+let allProteins = [];
+const getCoverageButton = document.getElementById('getCoverageButton');
+const proteinSequencesContainer = document.getElementById('proteinSequences');
 
 backButton.addEventListener('click', () => {
   let navData = {
@@ -25,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedAnalysis = JSON.parse(selectedAnalysisJson);
     const runIdElement = document.querySelector('.runID');
     if (runIdElement) {
-      runIdElement.textContent = `Analysis ID: ${selectedAnalysis.id}`;
+      runIdElement.textContent = `Analysis: ${selectedAnalysis.name}`;
     }
     
     // Chargez la liste des identifiants de protéines pour l'analyse sélectionnée
@@ -43,7 +46,7 @@ async function loadProteinList(analysisId, tool) {
       // Lisez le contenu du fichier texte
       const proteinIdsText = await response.text();
       // Séparez les lignes du fichier texte et supprimez les lignes vides
-      const allProteins = proteinIdsText.split('\n').filter(Boolean);
+      allProteins = proteinIdsText.split('\n').filter(Boolean);
       // Initialisez la liste déroulante Select2 avec les identifiants de protéines chargés
       initializeSelect2(allProteins);
       // Initialisez la liste déroulante Select2 avec les identifiants de protéines chargés
@@ -61,7 +64,8 @@ function initializeSelect2(allProteins) {
   proteinInput.select2({
     data: allProteins,
     placeholder: 'Search a protein',
-  });
+    minimumInputLength: 3,
+  });  
 }
 
 function processLogLine(logLine) {
@@ -148,65 +152,80 @@ async function extractCoverageInfo(dict) {
 
 
 // Gestionnaire d'événements pour la sélection d'une protéine
-proteinInput.on('change', async function() {
+getCoverageButton.addEventListener('click', async function() {
   showLoading();
-  let selectedProteinDescriptions = $(this).val();
-  if (!Array.isArray(selectedProteinDescriptions)) {
-    selectedProteinDescriptions = [selectedProteinDescriptions];
-  }
+  const selectedProteinDescriptions = proteinInput.val(); // Obtenez les protéines sélectionnées
+  
+  if (selectedProteinDescriptions.length > 0) {
+      try {
+          // Nettoyez les anciens conteneurs de séquence s'il y en a
+          proteinSequencesContainer.innerHTML = '';
 
-  try {
-    let terminalOutput = await window.electronAPI.getCoverage({
-      "tool": selectedAnalysis.tool,
-      "selectedProteinDescriptions": selectedProteinDescriptions,
-      "runID": selectedAnalysis.id,
-    });
-    hideLoading();
-    let logLines = terminalOutput.split('\n').filter(line => line.startsWith('LOG='));
-    let infoDictList = logLines.map(processLogLine);
-    let mergedInfoDictList = mergedInfoDict(infoDictList)
-    for (let dict of mergedInfoDictList) {
-      const protein_coverage_data = await extractCoverageInfo(dict);
-      displayProteinSequence(protein_coverage_data, selectedProteinDescriptions);
-    }
-
-  } catch (error) {
-    hideLoading();
-    console.error('Error fetching coverage:', error);
+          let terminalOutput = await window.electronAPI.getCoverage({
+              "tool": selectedAnalysis.tool,
+              "selectedProteinDescriptions": selectedProteinDescriptions,
+              "runID": selectedAnalysis.id,
+          });
+          hideLoading();
+          let logLines = terminalOutput.split('\n').filter(line => line.startsWith('LOG='));
+          let infoDictList = logLines.map(processLogLine);
+          let mergedInfoDictList = mergedInfoDict(infoDictList);
+          for (let dict of mergedInfoDictList) {
+              const protein_coverage_data = await extractCoverageInfo(dict);
+              console.log(dict)
+              let selectedProteinDescription = dict.PROTEIN_ID;
+              displayProteinSequence(protein_coverage_data, selectedProteinDescription);
+          }
+      } catch (error) {
+          hideLoading();
+          console.error('Error fetching coverage:', error);
+      }
+  } else {
+      hideLoading();
+      console.error('No proteins selected.');
   }
 });
 
 // Fonction pour afficher la séquence de protéine
 function displayProteinSequence(proteinData, selectedProteinDescriptions) {
-  const sequenceElement = document.getElementById('proteinSequence');
-  const proteinSequenceDiv = document.querySelector('.protein-sequence');
-  const sequence_header_h2 = document.querySelector('.protein-sequence h2');
+  // Créez un conteneur de séquence pour chaque protéine
+  const sequenceContainer = document.createElement('div');
+  sequenceContainer.classList.add('protein-sequence');
+
+  const sequence_header_h2 = document.createElement('h2');
+  sequenceContainer.appendChild(sequence_header_h2);
+
+  const sequenceElement = document.createElement('pre');
+  sequenceElement.classList.add('coverage-sequence');
+  sequenceContainer.appendChild(sequenceElement);
+
+  // Ajoutez le conteneur de séquence à la section des séquences de protéine
+  proteinSequencesContainer.appendChild(sequenceContainer);
+
   if (sequenceElement) {
-    proteinSequenceDiv.style.display = 'block';
-    let sequenceHTML = '';
-    if (proteinData == null) {
-      sequence_header_h2.textContent = `>${selectedProteinDescriptions}`;
-      sequenceHTML = 'This protein has not been identified in your analysis';
-    }
-    else {
-      sequence_header_h2.textContent = proteinData.header;
-      const sequence = proteinData.sequence;
-      const coverageSign = proteinData.coverage_sign;
-  
-      
-  
-      for (let i = 0; i < sequence.length; i++) {
-        const aminoAcid = sequence[i];
-        const coverageChar = coverageSign[i];
-        if (coverageChar === '+'){
-          sequenceHTML += `<span class="identified">${aminoAcid}</span>`;
-        }
-        else {
-          sequenceHTML += `<span>${aminoAcid}</span>`;
-        }
+      sequenceContainer.style.display = 'block';
+      let sequenceHTML = '';
+      if (proteinData == null) {
+          sequence_header_h2.textContent = `>${selectedProteinDescriptions}`;
+          sequenceHTML = 'This protein has not been identified in your analysis';
       }
-    }
-    sequenceElement.innerHTML = sequenceHTML;
+      else {
+          sequence_header_h2.textContent = proteinData.header;
+          const sequence = proteinData.sequence;
+          const coverageSign = proteinData.coverage_sign;
+
+          for (let i = 0; i < sequence.length; i++) {
+              const aminoAcid = sequence[i];
+              const coverageChar = coverageSign[i];
+              if (coverageChar === '+'){
+                  sequenceHTML += `<span class="identified">${aminoAcid}</span>`;
+              }
+              else {
+                  sequenceHTML += `<span>${aminoAcid}</span>`;
+              }
+          }
+      }
+      sequenceElement.innerHTML = sequenceHTML;
   }
 }
 

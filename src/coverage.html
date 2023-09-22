@@ -24,15 +24,15 @@
   </header>
   <main>
     <div class="select-container">
-      <label for="proteinInput">Select a protein:</label>
-      <select class="proteinInput" type="text" id="proteinInput" placeholder="Search a protein"></select>
-    </div>
-    <div class="protein-sequence">
-      <h2></h2>
-      <div class="protein-sequence-content">
-        <pre id="proteinSequence" class="coverage-sequence"></pre>
-      </div>
-    </div>
+      <label for="proteinInput">Select protein(s):</label>
+      <select class="proteinInput" type="text" id="proteinInput" placeholder="Search for proteins" multiple="multiple"></select>
+  </div>
+  <button id="getCoverageButton" class="center-button">Get coverage(s)</button>
+
+  
+  <div id="proteinSequences" class="protein-sequences">
+    <!-- Les conteneurs de séquence de protéine seront générés ici -->
+</div>
     <div id="window" class="window">
       <span></span>
     </div>

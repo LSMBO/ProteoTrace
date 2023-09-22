@@ -70,6 +70,10 @@ h2 {
     margin: 10px
 }
 
+label {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
 .msForm, .loaded-analysis-box {
     border: 1px solid #FF6F61;
     width: 45%;
@@ -135,20 +139,20 @@ h2 {
 .window span::before {
     content: url('../assets/icons/logo.png'); /* Utilisez le chemin vers votre logo */
     display: inline-block;
-    animation: spinAndScale 2s linear infinite; /* Animation de rotation et de changement de taille */
+    animation: spinAndScale 2s cubic-bezier(0.4, 2.5, 0.5, 0.5) infinite; /* Animation de rotation et de changement de taille avec une courbe de vitesse personnalisée */
     margin-right: 12px;
     filter: invert(100%);
 }
 
 @keyframes spinAndScale {
     0% { 
-        transform: rotate(0deg) scale(0.05); 
+        transform: rotate(0deg) scale(0.08); /* Départ: pas de rotation, échelle réduite */
     }
     50% {
-        transform: rotate(180deg) scale(0.08);
+        transform: rotate(180deg) scale(0.15); /* Rotation à mi-chemin avec une échelle maximale */
     }
     100% { 
-        transform: rotate(360deg) scale(0.05); 
+        transform: rotate(360deg) scale(0.08); /* Retour à la position initiale */
     }
 }
 
@@ -184,6 +188,12 @@ button {
     font-size: 1.3rem;
     transition: background-color 0.3s ease;
     cursor: pointer;
+}
+
+.center-button {
+    display: block;
+    margin: 0 auto;
+    text-align: center;
 }
 
 button:hover {

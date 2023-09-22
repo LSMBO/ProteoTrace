@@ -80,6 +80,7 @@ const runPythonScriptMain = (formData) => {
     // Événement pour gérer les données renvoyées par le processus Python (stdout)
     pythonProcess.stdout.on('data', (data) => {
       terminalOutput += data.toString();
+      console.log(terminalOutput)
     });
 
     // Événement pour gérer les erreurs renvoyées par le processus Python (stderr)
@@ -124,6 +125,7 @@ const runPythonScriptGetCoverage = (data) => {
     // Événement pour gérer les données renvoyées par le processus Python (stdout)
     pythonProcess.stdout.on('data', (data) => {
       terminalOutput += data.toString();
+      console.log(terminalOutput)
     });
 
     // Événement pour gérer les erreurs renvoyées par le processus Python (stderr)
