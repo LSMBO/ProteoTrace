@@ -16,8 +16,8 @@ const isDev = process.env.NODE_ENV !== 'production';
 // Fonction pour créer la fenêtre de l'application
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
-    width: isDev ? 1200 : 800,
-    height: 600,
+    width: 1200,
+    height: 700,
     title: "ProteoTrace",
     webPreferences: {
       nodeIntegration: true, // Autorise l'utilisation de require() dans le processus de rendu
@@ -33,12 +33,24 @@ const createWindow = () => {
     mainWindow.webContents.openDevTools();
   }
 
-  ipcMain.on('open-coverage-page', (event, selectedAnalysis) => {
+  ipcMain.on('open-coverage-page', (event, navData) => {
+    let selectedAnalysis = navData.selectedAnalysis;
+    let loadedAnalysisIdList = navData.loadedAnalysisIdList;
     mainWindow.loadFile(
       path.join(__dirname, 'coverage.html'), 
       { 
-        query: { selectedAnalysis: JSON.stringify(selectedAnalysis) } 
+        query: { 
+          selectedAnalysis: JSON.stringify(selectedAnalysis),
+          loadedAnalysisIdList: JSON.stringify(loadedAnalysisIdList),
+          } 
       }
+    );
+  }),
+  ipcMain.on('open-home-page', (event, navData) => {
+    let loadedAnalysisIdList = navData.loadedAnalysisIdList;
+    mainWindow.loadFile(
+      path.join(__dirname, 'index.html'), 
+      { query: { loadedAnalysisIdList: JSON.stringify(loadedAnalysisIdList) } }
     );
   });
 };
@@ -89,7 +101,6 @@ const runPythonScriptGetCoverage = (data) => {
     const selectedProteinDescriptions = data.selectedProteinDescriptions || []; // Utilisez un tableau vide par défaut
     const tool = data.tool;
     const runID = data.runID;
-    console.log(data)
     const scriptPath = path.join(__dirname, 'main.py');
 
     // Créez un tableau pour stocker les arguments
@@ -172,8 +183,6 @@ app.whenReady().then(() => {
 });
 
 
-
-
 // Quitte l'application lorsque toutes les fenêtres sont fermées (sauf sur macOS)
 app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin') {
@@ -187,7 +196,6 @@ app.on('window-all-closed', async () => {
         const filePath = path.join(tmpDir, file);
         await fs.promises.unlink(filePath);
       }
-      
       app.quit();
     } catch (err) {
       console.error('Erreur lors de la suppression des fichiers temporaires :', err);

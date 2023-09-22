@@ -15,8 +15,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       throw new Error(`An error occurred: ${error.message}`);
     }
   },
-  openCoveragePage: (selectedAnalysis) => {
-    ipcRenderer.send('open-coverage-page', selectedAnalysis);
+  openCoveragePage: (navData) => {
+    ipcRenderer.send('open-coverage-page', navData);
+  },
+  openHomePage: (navData) => {
+    ipcRenderer.send('open-home-page', navData);
   },
   getCoverage: async (args) => {
     try {

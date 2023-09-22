@@ -10,12 +10,40 @@ let loadedAnalysisIdList = []
 
 
 coverageBtn.addEventListener('click', () => {
-  window.electronAPI.openCoveragePage(selectedAnalysis);
+  let navData = {
+    "selectedAnalysis": selectedAnalysis,
+    "loadedAnalysisIdList": loadedAnalysisIdList
+  }
+  window.electronAPI.openCoveragePage(navData);
 });
 
 
-// Appelle la fonction toggleField() lors du chargement initial de la page
-document.addEventListener('DOMContentLoaded', toggleField);
+
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+  let loadedAnalysisIdListJson = urlParams.get('loadedAnalysisIdList');
+  if (loadedAnalysisIdListJson) {
+    const newLoadedAnalysisList = JSON.parse(loadedAnalysisIdListJson);
+    newLoadedAnalysisList.forEach((analysis) => {
+      let analysisExists = false;
+      loadedAnalysisIdList.forEach((existingAnalysis) => {
+        if (existingAnalysis.id === analysis.id) {
+          analysisExists = true;
+        }
+      });
+      if (!analysisExists) {
+        loadedAnalysisIdList.push(analysis);
+      }
+    });
+  }
+  loadedAnalysisIdList.forEach((analysis) => {
+    addNewAnalysisToList(analysis.name, analysis.tool, analysis.id);
+  });
+
+  toggleField()
+});
+
+
 
 // Événement lorsqu'un formulaire est soumis
 msForm.addEventListener('submit', async (event) => {
@@ -42,7 +70,6 @@ msForm.addEventListener('submit', async (event) => {
 
     // Appelle la fonction 'clickSubmit' du processus principal (index.js) en passant les données du formulaire
     const terminalOutput = await window.electronAPI.clickSubmit(formDataObject);
-    console.log(terminalOutput)
     const runId = terminalOutput
       .split('\n')
       .filter(line => line.startsWith('RUN_ID='))
@@ -69,46 +96,51 @@ msForm.addEventListener('submit', async (event) => {
 });
 
 
-// Lorsque vous ajoutez un nouvel élément <li> à la liste
 function addNewAnalysisToList(name, tool, run_id) {
-  const analysisSelection = document.querySelectorAll('.loaded-analysis-box ul li');
+  const loadedAnalysisDiv = document.getElementById('loaded-analysis');
   const newListItem = document.createElement('li');
   newListItem.textContent = `${name} (${tool})`;
   newListItem.setAttribute('data-analysis-id', run_id);
-  
-  // Attachez le gestionnaire d'événements 'click' à ce nouvel élément <li>
-  newListItem.addEventListener('click', () => {
-    const isSelected = newListItem.classList.contains('analysis_selected');
-    
-    analysisSelection.forEach((otherLi) => {
-      if (newListItem != otherLi) {
-        otherLi.classList.remove('analysis_selected');
-      }
-    });
-    
-    if (!isSelected) {
-      newListItem.classList.add('analysis_selected');
-      const selectedAnalysisId = newListItem.getAttribute('data-analysis-id');
-      selectedAnalysis = loadedAnalysisIdList.find((analysis) => analysis.id === selectedAnalysisId);
-      coverageBtn.disabled = false;
-      ptmsBtn.disabled = false;
-    }
-    
-    if (isSelected) {
-      newListItem.classList.remove('analysis_selected');
-      coverageBtn.disabled = true;
-      ptmsBtn.disabled = true;
+  loadedAnalysisDiv.appendChild(newListItem);
+  const analysisSelection = loadedAnalysisDiv.querySelectorAll('ul li');
+  // Supprime les anciens gestionnaires d'événements clic
+  analysisSelection.forEach((li) => {
+    li.removeEventListener('click', handleAnalysisClick);
+  });
+
+  // Crée un nouvel gestionnaire d'événements clic pour chaque élément
+  analysisSelection.forEach((li) => {
+    li.addEventListener('click', handleAnalysisClick);
+  });
+
+  loadedAnalysisIdList.push({
+    'id': run_id,
+    'name': name,
+    'tool': tool
+  });
+}
+
+// Gestionnaire d'événements pour gérer la sélection d'analyses
+function handleAnalysisClick() {
+  const isSelected = this.classList.contains('analysis_selected');
+  const analysisSelection = loadedAnalysisDiv.querySelectorAll('ul li');
+  analysisSelection.forEach((li) => {
+    if (this !== li) {
+      li.classList.remove('analysis_selected');
     }
   });
-  
-  loadedAnalysisDiv.appendChild(newListItem);
-  loadedAnalysisIdList.push(
-    {
-      'id' : run_id,
-      'name' : name,
-      'tool' : tool
-    }
-  );
+
+  if (!isSelected) {
+    this.classList.add('analysis_selected');
+    const selectedAnalysisId = this.getAttribute('data-analysis-id');
+    selectedAnalysis = loadedAnalysisIdList.find((analysis) => analysis.id === selectedAnalysisId);
+    coverageBtn.disabled = false;
+    //ptmsBtn.disabled = false;
+  } else {
+    this.classList.remove('analysis_selected');
+    coverageBtn.disabled = true;
+    //ptmsBtn.disabled = true;
+  }
 }
 
 
@@ -122,7 +154,7 @@ dialogBoxOkButton.addEventListener('click', () => {
 function showLoading() {
   const loadingIndicator = document.getElementById('window');
   const loadingIndicatorSpan = document.querySelector('.window span');
-  loadingIndicator.style.display = 'block';
+  loadingIndicator.style.display = 'flex';
   loadingIndicatorSpan.style.display = 'block';
 }
 

@@ -5,17 +5,26 @@ from Protein import Protein
 from Peptide import Peptide
 
 class Proline:
-    def __init__(self, excel_file_path, fasta_file):
+    def __init__(self, excel_file_path, fasta_file, protein_description_list=[]):
         self.excel_file_path = excel_file_path
-        self.settings_sheet = []
-        self.settings_sheet_col_name = []
-        self.psms_from_protein_sets = []
-        self.psms_from_protein_sets_col_name = []
-        self.load_excel_file()
-        self.sequences = self.read_fasta(fasta_file)
-        self.peptides = self.search_peptides()
-        self.proteins, self.protein_groups = self.search_proteins()
+        self.fasta_file = fasta_file
+        if protein_description_list:
+            self.settings_sheet = []
+            self.settings_sheet_col_name = []
+            self.psms_from_protein_sets = []
+            self.psms_from_protein_sets_col_name = []
+            self.load_excel_file()
+            self.sequences = self.read_fasta(fasta_file)
+            protein_id_list = self.get_protein_id_list(protein_description_list)
+            self.peptides = self.search_peptides(protein_id_list)
+            self.proteins, self.protein_groups = self.search_proteins()
 
+    def get_protein_id_list(self, protein_description_list):
+        id_list = []
+        for desc in protein_description_list:
+            id_list.append(desc.split(' ')[0])
+        return id_list
+    
     def load_excel_file(self):
         try:
             workbook = openpyxl.load_workbook(self.excel_file_path)
@@ -49,17 +58,32 @@ class Proline:
                 entry["sequence"] = str(record.seq)
                 sequences.append(entry)
         return sequences
-    
-    def search_peptides(self):
+
+
+    def get_protein_ids_from_row(self, row):
+        sameset_col_name_index = self.psms_from_protein_sets_col_name.index("samesets_accessions")
+        subset_col_name_index = self.psms_from_protein_sets_col_name.index("subsets_accessions")
+        sameset_list = row[sameset_col_name_index].split(';')
+        subset_list = []
+        protein_list = []
+        if row[subset_col_name_index]:
+            subset_list = row[subset_col_name_index].split(';')
+        protein_list = [elem.lstrip(' >') for elem in sameset_list + subset_list]
+        return protein_list
+        
+    def search_peptides(self, protein_list):
         peptides = []
         peptide_id_step = 0
         peptide_sequences = []
+                    
         for row in self.psms_from_protein_sets:
-            peptide_id = row[self.psms_from_protein_sets_col_name.index('peptide_id')]
-            peptide_sequence = row[self.psms_from_protein_sets_col_name.index('sequence')]
-            peptide_sequences.append(peptide_sequence)
-            peptide_id = peptide_id - peptide_id_step
-            peptides.append(Peptide(self.sequences, peptide_id, self.psms_from_protein_sets_col_name, row))
+            protein_ids = self.get_protein_ids_from_row(row)
+            if any(protein_id in protein_list for protein_id in protein_ids):
+                peptide_id = row[self.psms_from_protein_sets_col_name.index('peptide_id')]
+                peptide_sequence = row[self.psms_from_protein_sets_col_name.index('sequence')]
+                peptide_sequences.append(peptide_sequence)
+                peptide_id = peptide_id - peptide_id_step
+                peptides.append(Peptide(self.sequences, peptide_id, self.psms_from_protein_sets_col_name, row))
         return peptides
     
     

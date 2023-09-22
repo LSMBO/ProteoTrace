@@ -10,9 +10,9 @@
 </head>
 <body>
   <header>
-    <a class="back-button" href="index.html">
+    <div class="back-button">
         <img src="../assets/icons/back.png" alt="Back" />
-    </a>
+    </div>
     <div class="title-subtitle">
       <h1>Coverage Page</h1>
       <div class="runID"></div>
@@ -24,8 +24,17 @@
   </header>
   <main>
     <div class="select-container">
-        <label for="proteinInput">Select a protein:</label>
-        <select class="proteinInput" type="text" id="proteinInput" placeholder="Search a protein"></select>
+      <label for="proteinInput">Select a protein:</label>
+      <select class="proteinInput" type="text" id="proteinInput" placeholder="Search a protein"></select>
+    </div>
+    <div class="protein-sequence">
+      <h2></h2>
+      <div class="protein-sequence-content">
+        <pre id="proteinSequence" class="coverage-sequence"></pre>
+      </div>
+    </div>
+    <div id="window" class="window">
+      <span></span>
     </div>
   </main>
   <footer>

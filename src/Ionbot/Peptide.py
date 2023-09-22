@@ -44,15 +44,3 @@ class Peptide:
                 proteins.append(protein_id)      
         return proteins
         
-        
-    # def search_protein_groups(self):
-    #     protein_groups = []
-    #     content = self.ionbot.file_proteins
-    #     index_peptide_id = self.file_proteins_col_names.index("ionbot_match_id")
-    #     index_protein_group = self.file_proteins_col_names.index("protein_group")
-    #     if index_peptide_id and index_protein_group:
-    #         for row in content:
-    #             if row[index_peptide_id] == self.id and row[index_protein_group] not in protein_groups:
-    #                 protein_groups.append(row[index_protein_group])
-    
-    

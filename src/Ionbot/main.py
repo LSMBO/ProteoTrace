@@ -2,6 +2,8 @@ from Ionbot import Ionbot
 import pickle
 import argparse
 import random, string
+from Bio import SeqIO
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', help='Ionbot result folder (txt folder)')
@@ -16,6 +18,10 @@ def strip_list(input_list):
         new_list.append(i[1:-2])
     return new_list
 
+def description_to_id(protein_description):
+    return protein_description.split(' ')[0]
+
+
 if (args.r and args.f):
     result_folder = args.r
     fasta_file = args.f
@@ -26,34 +32,11 @@ if (args.r and args.f):
     ionbot = Ionbot(result_folder, fasta_file)
     with open(output_file_pkl, 'wb') as pkl_file:
         pickle.dump(ionbot, pkl_file)
-    
-    # Sauvegarder chaque objet Protein dans un fichier pkl
-    for protein in ionbot.proteins:
-        if (protein_id.startswith("CON|")):
-            continue
-        protein_id = protein.id.replace('|', '##')
-        pkl_file = f"tmp/Ionbot_proteotrace_{random_suffix}_Protein={protein_id}.pkl"
-        with open(pkl_file, 'wb') as pkl_file:
-            pickle.dump(protein, pkl_file)
-
-    # Sauvegarder chaque objet Peptide dans un fichier pkl
-    for peptide in ionbot.peptides:
-        peptide_id = peptide.id
-        pkl_file = f"tmp/Ionbot_proteotrace_{random_suffix}_Peptide={peptide_id}.pkl"
-        with open(pkl_file, 'wb') as pkl_file:
-            pickle.dump(peptide, pkl_file)
-
-    # Sauvegarder chaque objet ProteinGroup dans un fichier pkl
-    for protein_group in ionbot.protein_groups:
-        protein_group_id = protein_group.id
-        pkl_file = f"tmp/Ionbot_proteotrace_{random_suffix}_ProteinGroup={protein_group_id}.pkl"
-        with open(pkl_file, 'wb') as pkl_file:
-            pickle.dump(protein_group, pkl_file)
+        
             
-    # Sauvegarde la liste des proteines du fasta dans un fichier tmp
-    database = ionbot.sequences
-    protein_description_all = [sequence["description"] for sequence in database]
+    protein_description_all = [record.description for record in SeqIO.parse(fasta_file, "fasta")]
     print(f"RUN_ID={random_suffix}")
+    
     with open(output_file_txt, 'w') as output_file:
         for protein_description in protein_description_all:
             output_file.write(f"{protein_description}\n")
@@ -64,45 +47,22 @@ elif (args.runID):
     pkl_file = f"tmp/Ionbot_proteotrace_{args.runID}.pkl"
     with open(pkl_file, 'rb') as pkl_file:
         ionbot = pickle.load(pkl_file)
-
-    # Charger les objets Protein depuis les fichiers pkl
-    loaded_proteins = []
-    for protein in ionbot.proteins:
-        protein_id = protein.id.replace('|', '##')
-        pkl_file = f"tmp/Ionbot_proteotrace_{args.runID}_Protein={protein_id}.pkl"
-        with open(pkl_file, 'rb') as pkl_file:
-            loaded_protein = pickle.load(pkl_file)
-        loaded_proteins.append(loaded_protein)
+    result_folder = ionbot.result_folder
+    fasta_file = ionbot.fasta_file
+    ionbot = Ionbot(result_folder, fasta_file, args.protein_descriptions)
     
-    # Charger les objets Peptide depuis les fichiers pkl
-    loaded_peptides = []
-    for peptide in ionbot.peptides:
-        peptide_id = peptide.id
-        pkl_file = f"tmp/Ionbot_proteotrace_{args.runID}_Peptide={peptide_id}.pkl"
-        with open(pkl_file, 'rb') as pkl_file:
-            loaded_peptide = pickle.load(pkl_file)
-        loaded_peptides.append(loaded_peptide)
-
-    # Charger les objets ProteinGroup depuis les fichiers pkl
-    loaded_protein_groups = []
-    for protein_group in ionbot.protein_groups:
-        protein_group_id = protein_group.id
-        pkl_file = f"tmp/Ionbot_proteotrace_{args.runID}_ProteinGroup={protein_group_id}.pkl"
-        with open(pkl_file, 'rb') as pkl_file:
-            loaded_protein_group = pickle.load(pkl_file)
-        loaded_protein_groups.append(loaded_protein_group)
-        
     for protein_description in args.protein_descriptions:
         found = False
-        for loaded_protein in loaded_proteins:
-            if loaded_protein.description == protein_description:
+        for ionbot_protein in ionbot.proteins:
+            if ionbot_protein.description == protein_description:
                 found = True
-                loaded_protein_transformed_id = loaded_protein.id.replace('|', '##')
-                loaded_protein.get_sequence_coverage(f"tmp/Ionbot_proteotrace_{args.runID}_{loaded_protein_transformed_id}_coverage.txt")
+                ionbot_protein_transformed_id = ionbot_protein.id.replace('|', '##')
+                coverage_file=f"tmp/Ionbot_proteotrace_{args.runID}_{ionbot_protein_transformed_id}_coverage.txt"
+                ionbot_protein.get_sequence_coverage(coverage_file)
+                print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@IDENTIFIED=TRUE")
+                print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@COVERAGE_FILE={coverage_file}")
                 break
-        if found:
-            print(f"LOG={protein_description}@@IDENTIFIED=TRUE")
-        else:
-            print(f"LOG={protein_description}@@IDENTIFIED=FALSE")        
+        if not found:
+            print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@IDENTIFIED=FALSE")        
         
 

@@ -4,22 +4,28 @@ from Protein import Protein
 from Peptide import Peptide
 
 class Ionbot:
-    def __init__(self, result_folder, fasta_file, mode="first"):
+    def __init__(self, result_folder, fasta_file, protein_description_list=[]):
         self.result_folder = result_folder
-        if mode=="first":
+        self.fasta_file = fasta_file
+        if protein_description_list:
             self.file_proteins = self.get_table_from_file("ionbot.first.proteins.csv")
             self.file_psm = self.get_table_from_file("ionbot.first.csv")
-        elif mode=="lower":
-            self.file_proteins = self.get_table_from_file("ionbot.coeluting.proteins.csv")
-            self.file_psm = self.get_table_from_file("ionbot.lower.csv")
-        self.file_proteins_col_names = self.file_proteins[0]
-        self.file_proteins = self.file_proteins[1:]
-        self.file_psm_col_names = self.file_psm[0]
-        self.file_psm = self.file_psm[1:]
-        self.sequences = self.read_fasta(fasta_file)
-        self.peptides = self.search_psms()
-        self.proteins, self.protein_groups = self.search_proteins()
+            self.file_proteins_col_names = self.file_proteins[0]
+            self.file_proteins = self.file_proteins[1:]
+            self.file_psm_col_names = self.file_psm[0]
+            self.file_psm = self.file_psm[1:]
+            self.sequences = self.read_fasta(fasta_file)
+            protein_id_list = self.get_protein_id_list(protein_description_list)
+            self.peptides = self.search_psms(protein_id_list)
+            self.proteins, self.protein_groups = self.search_proteins()
 
+    
+    def get_protein_id_list(self, protein_description_list):
+        id_list = []
+        for desc in protein_description_list:
+            id_list.append(desc.split(' ')[0])
+        return id_list
+    
     def get_table_from_file(self, file):
         table_data = []
         file_path = f"{self.result_folder}/{file}"
@@ -49,11 +55,23 @@ class Ionbot:
                 sequences.append(entry)
         return sequences
     
-    def search_psms(self):
+    def get_protein_ids_from_row(self, row):
+        protein_ids = []
+        index_protein = self.file_psm_col_names.index("proteins")
+        raw_prots = row[index_protein].split('||')
+        for raw_prot in raw_prots:
+            protein_id = raw_prot.split('((')[0]
+            if not protein_id.startswith('decoy_') and not protein_id.startswith("sp|"):
+                protein_ids.append(protein_id)
+        return protein_ids
+
+    def search_psms(self, protein_list):
         peptides = []
         for row in self.file_psm:
             psm_id = row[0]
-            peptides.append(Peptide(self.sequences, psm_id, self.file_psm_col_names, row))
+            protein_ids = self.get_protein_ids_from_row(row)
+            if any(protein_id in protein_list for protein_id in protein_ids):
+                peptides.append(Peptide(self.sequences, psm_id, self.file_psm_col_names, row))
         return peptides
         
     def search_proteins(self):

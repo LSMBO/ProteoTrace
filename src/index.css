@@ -118,7 +118,7 @@ h2 {
 }
 
 .window {
-    background-color: rgba(0, 0, 0, 0.5); /* Fond semi-transparent pour l'effet de superposition */
+    background-color: rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
     left: 0;
@@ -128,11 +128,28 @@ h2 {
     align-items: center;
     justify-content: center;
     z-index: 1;
-  }
+}
 
-.window span {
-    color: white;
-    font-size: 24px;
+
+/* Style pour l'animation de chargement avec le logo */
+.window span::before {
+    content: url('../assets/icons/logo.png'); /* Utilisez le chemin vers votre logo */
+    display: inline-block;
+    animation: spinAndScale 2s linear infinite; /* Animation de rotation et de changement de taille */
+    margin-right: 12px;
+    filter: invert(100%);
+}
+
+@keyframes spinAndScale {
+    0% { 
+        transform: rotate(0deg) scale(0.05); 
+    }
+    50% {
+        transform: rotate(180deg) scale(0.08);
+    }
+    100% { 
+        transform: rotate(360deg) scale(0.05); 
+    }
 }
 
 .dialog-box {
@@ -230,7 +247,26 @@ button:hover {
     margin-right: 10px;
 }
 
+
 .back-button:hover {
     opacity: 0.8;
+    cursor: pointer;
 }
 
+.protein-sequence-content {
+    margin: 20px auto;
+}
+
+.protein-sequence {
+    background-color: white;
+    width: 95%;
+    font-size: 1.2rem;
+    margin: 20px 15px;
+    padding: 8px;
+    border: 1px solid #fa4b3b;
+    display: none;
+}
+
+.coverage-sequence .identified {
+    color: #54BE17;
+}

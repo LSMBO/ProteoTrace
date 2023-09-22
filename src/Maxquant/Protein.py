@@ -26,7 +26,7 @@ class Protein:
         peptide_dict = {peptide.id: peptide for peptide in self.maxquant_peptides}
         peptides = []
         for row in self.rows:
-            peptide_ids_pg = row[self.protein_file_col_name.index('Peptide IDs')].split(';')
+            peptide_ids_pg = row[self.protein_file_col_name.index('Mod. peptide IDs')].split(';')
             peptide_sequences_pg = row[self.protein_file_col_name.index('Peptide sequences')].split(';')
             peptide_ids = []
             for index in range(len(peptide_sequences_pg)):
@@ -47,7 +47,7 @@ class Protein:
     
     def merge_coordinate(self, coords):
         merged_coords = []
-        start, end = coords[0]
+        start, end = coords[0]        
         for coord in coords[1:]:
             if coord[0] <= end:
                 end = max(end, coord[1])
