@@ -8,6 +8,7 @@ let selectedAnalysis = null;
 let allProteins = [];
 const getCoverageButton = document.getElementById('getCoverageButton');
 const proteinSequencesContainer = document.getElementById('proteinSequences');
+let tmp_path = '';
 
 backButton.addEventListener('click', () => {
   let navData = {
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   let selectedAnalysisJson = urlParams.get('selectedAnalysis');
   let loadedAnalysisIdListJson = urlParams.get('loadedAnalysisIdList');
+  tmp_path = urlParams.get('tmp_path');
   loadedAnalysisIdList = JSON.parse(loadedAnalysisIdListJson);
   
   if (selectedAnalysisJson) {
@@ -39,8 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // Fonction asynchrone pour charger la liste des identifiants de protéines pour une analyse donnée
 async function loadProteinList(analysisId, tool) {
   try {
+    showLoading();
     // Effectuez une requête pour lire un fichier texte contenant les identifiants de protéines
-    const response = await fetch(`../tmp/${tool}_proteotrace_protein_list_${analysisId}.txt`);
+    const proteinListFilePath = `${tmp_path}/${tool}_proteotrace_protein_list_${analysisId}.txt`;
+    const response = await fetch(proteinListFilePath);
 
     if (response.ok) {
       // Lisez le contenu du fichier texte
@@ -53,8 +57,10 @@ async function loadProteinList(analysisId, tool) {
     } else {
       console.error('Failed to load protein list:', response.status, response.statusText);
     }
+    hideLoading();
   } catch (error) {
     console.error('Error loading protein list:', error);
+    hideLoading();
   }
 }
 
@@ -122,26 +128,22 @@ function mergedInfoDict(infoDictList) {
 
 async function extractCoverageInfo(dict) {
   if (dict["IDENTIFIED"] === "TRUE" && dict['COVERAGE_FILE']) {
-    // Construire le chemin du fichier de couverture
-    let coverageFilePath = `../${dict['COVERAGE_FILE']}`;
-
     try {
-      // Lire le fichier de couverture
+      let coverageFilePath = dict['COVERAGE_FILE'];
       const response = await fetch(coverageFilePath);
-      if (!response.ok) {
+
+      if (response.ok) {
+        const coverageText = await response.text();
+        const coverageLines = coverageText.split('\n');
+        return {
+          header: coverageLines[0].slice(0, -1),
+          sequence: coverageLines[1].slice(0, -1),
+          coverage_sign: coverageLines[2].slice(0, -1),
+        };
+      } else {
         console.error('Failed to load coverage file:', response.status, response.statusText);
         return null;
-      }
-      
-      const coverageText = await response.text();
-      const coverageLines = coverageText.split('\n');
-
-      // Créer l'objet protein_coverage_data
-      return {
-        header: coverageLines[0].slice(0, -1),
-        sequence: coverageLines[1].slice(0, -1),
-        coverage_sign: coverageLines[2].slice(0, -1),
-      };
+      }     
     } catch (error) {
       console.error('Error fetching coverage:', error);
       return null;
@@ -155,7 +157,6 @@ async function extractCoverageInfo(dict) {
 getCoverageButton.addEventListener('click', async function() {
   showLoading();
   const selectedProteinDescriptions = proteinInput.val(); // Obtenez les protéines sélectionnées
-  
   if (selectedProteinDescriptions.length > 0) {
       try {
           // Nettoyez les anciens conteneurs de séquence s'il y en a
@@ -166,13 +167,13 @@ getCoverageButton.addEventListener('click', async function() {
               "selectedProteinDescriptions": selectedProteinDescriptions,
               "runID": selectedAnalysis.id,
           });
+          console.log(terminalOutput)
           hideLoading();
           let logLines = terminalOutput.split('\n').filter(line => line.startsWith('LOG='));
           let infoDictList = logLines.map(processLogLine);
           let mergedInfoDictList = mergedInfoDict(infoDictList);
           for (let dict of mergedInfoDictList) {
               const protein_coverage_data = await extractCoverageInfo(dict);
-              console.log(dict)
               let selectedProteinDescription = dict.PROTEIN_ID;
               displayProteinSequence(protein_coverage_data, selectedProteinDescription);
           }

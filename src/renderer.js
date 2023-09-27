@@ -70,6 +70,7 @@ msForm.addEventListener('submit', async (event) => {
 
     // Appelle la fonction 'clickSubmit' du processus principal (index.js) en passant les données du formulaire
     const terminalOutput = await window.electronAPI.clickSubmit(formDataObject);
+    console.log(terminalOutput)
     const runId = terminalOutput
       .split('\n')
       .filter(line => line.startsWith('RUN_ID='))

@@ -3,12 +3,14 @@ import pickle
 import argparse
 import random, string
 from Bio import SeqIO
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', help='Proline excel output file')
 parser.add_argument('-f', help='Database used in the identification search')
 parser.add_argument('-runID', help='Run id')
 parser.add_argument('--protein-descriptions', help='Protein id', action='append')
+parser.add_argument('--tmp-path', help='Path to the temporary directory')
 args = parser.parse_args()
 
 def strip_list(input_list):
@@ -25,8 +27,9 @@ if (args.r and args.f):
     excel_file_path = args.r
     fasta_file = args.f
     random_suffix = ''.join(random.choices(string.digits, k=4))
-    output_file_pkl = f"tmp/Proline_proteotrace_{random_suffix}.pkl"
-    output_file_txt = f"tmp/Proline_proteotrace_protein_list_{random_suffix}.txt"
+    output_file_pkl = os.path.join(args.tmp_path, f"Proline_proteotrace_{random_suffix}.pkl")
+    output_file_txt = os.path.join(args.tmp_path, f"Proline_proteotrace_protein_list_{random_suffix}.txt")
+
 
     proline = Proline(excel_file_path, fasta_file)
     with open(output_file_pkl, 'wb') as pkl_file:
@@ -42,7 +45,7 @@ if (args.r and args.f):
 elif (args.runID):
     args.runID = args.runID[:-2]
     args.protein_descriptions = strip_list(args.protein_descriptions)
-    pkl_file = f"tmp/Proline_proteotrace_{args.runID}.pkl"
+    pkl_file = os.path.join(args.tmp_path, f"Proline_proteotrace_{args.runID}.pkl")  # Utilisez le chemin absolu pour le fichier pkl
     with open(pkl_file, 'rb') as pkl_file:
         proline = pickle.load(pkl_file)
     excel_file_path = proline.excel_file_path
@@ -56,7 +59,7 @@ elif (args.runID):
             if proline_protein.description == protein_description:
                 found = True
                 proline_protein_transformed_id = proline_protein.id.replace('|', '##')
-                coverage_file=f"tmp/Proline_proteotrace_{args.runID}_{proline_protein_transformed_id}_coverage.txt"
+                coverage_file = os.path.join(args.tmp_path, f"Proline_proteotrace_{args.runID}_{proline_protein_transformed_id}_coverage.txt")  # Utilisez le chemin absolu pour le fichier de couverture
                 proline_protein.get_sequence_coverage(coverage_file)
                 print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@IDENTIFIED=TRUE")
                 print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@COVERAGE_FILE={coverage_file}")

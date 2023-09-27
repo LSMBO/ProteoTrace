@@ -37,7 +37,7 @@ class Peptide:
     def search_proteins(self):
         proteins = []        
         index_protein = self.file_psm_col_names.index("proteins")
-        raw_prots = self.row[index_protein].split('||')
+        raw_prots = self.row.iloc[index_protein].split('||')
         for raw_prot in raw_prots:
             protein_id = raw_prot.split('((')[0]
             if not protein_id.startswith('decoy_') and not protein_id.startswith("sp|"):

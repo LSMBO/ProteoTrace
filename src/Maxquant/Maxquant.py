@@ -62,20 +62,15 @@ class Maxquant:
        
     def search_peptides(self, protein_list):
         peptides = []
-        peptide_id_step = 0
         peptide_sequences = []
         for row in self.file_peptides:
             peptide_id = int(row[self.file_peptides_col_names.index('id')])
             peptide_protein_ids = self.get_protein_ids_from_row(row)
-            # Vérifier si au moins une des protéines du peptide est dans la liste protein_list
             if any(protein_id in protein_list for protein_id in peptide_protein_ids):
                 peptide_sequence = row[self.file_peptides_col_names.index('Sequence')]
-                if peptide_sequence in peptide_sequences:
-                    peptide_id_step = peptide_id_step + 1
-                else:
+                if peptide_sequence not in peptide_sequences:
                     peptide_sequences.append(peptide_sequence)
-                    peptide_id = peptide_id - peptide_id_step
-                    peptides.append(Peptide(self.sequences, str(peptide_id), str(peptide_id - peptide_id_step), self.file_peptides_col_names, row))
+                    peptides.append(Peptide(self.sequences, str(peptide_id), self.file_peptides_col_names, row))
         return peptides
         
     def search_proteins(self, protein_list):
@@ -106,7 +101,7 @@ class Maxquant:
         for protein_id, protein_rows_list in protein_rows.items():
             proteins.append(Protein(self.sequences, protein_id, self.file_proteins_col_names, protein_rows_list, self.peptides))
         
-        for protein_group_id, protein_gruop_rows_list in protein_group_rows.items():
-            protein_groups.append(ProteinGroup(self.sequences, protein_group_id, self.file_proteins_col_names, protein_gruop_rows_list, self.peptides))
+        for protein_group_id, protein_group_rows_list in protein_group_rows.items():
+            protein_groups.append(ProteinGroup(self.sequences, protein_group_id, self.file_proteins_col_names, protein_group_rows_list, self.peptides))
         
         return proteins, protein_groups

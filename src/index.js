@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 
 // Importation du module 'path' pour gérer les chemins de fichiers
 const path = require('path');
+const tmp_path = path.join(__dirname, '..', 'tmp');
 
 // Importation du module 'fs' (file system) pour accéder aux fonctionnalités du système de fichiers
 const fs = require('fs');
@@ -11,7 +12,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 
 // Définition d'une variable booléenne 'isDev' pour vérifier si l'application est en mode développement ou production
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV == 'development';
 
 // Fonction pour créer la fenêtre de l'application
 const createWindow = () => {
@@ -28,6 +29,9 @@ const createWindow = () => {
   // Charge l'index.html dans la fenêtre principale
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
+  // Ouvre la fenêtre en plein écran
+  mainWindow.maximize();
+
   // Ouvre les outils de développement si l'application est en mode développement
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -40,6 +44,7 @@ const createWindow = () => {
       path.join(__dirname, 'coverage.html'), 
       { 
         query: { 
+          tmp_path: tmp_path,
           selectedAnalysis: JSON.stringify(selectedAnalysis),
           loadedAnalysisIdList: JSON.stringify(loadedAnalysisIdList),
           } 
@@ -50,7 +55,10 @@ const createWindow = () => {
     let loadedAnalysisIdList = navData.loadedAnalysisIdList;
     mainWindow.loadFile(
       path.join(__dirname, 'index.html'), 
-      { query: { loadedAnalysisIdList: JSON.stringify(loadedAnalysisIdList) } }
+      { query: { 
+        tmp_path: tmp_path,
+        loadedAnalysisIdList: JSON.stringify(loadedAnalysisIdList) 
+      } }
     );
   });
 };
@@ -68,11 +76,13 @@ const runPythonScriptMain = (formData) => {
     } else if (formData.tool === 'Ionbot' || formData.tool === 'Maxquant') {
       result = formData.folder_result;
     }
+    const appPath = app.getAppPath();
+    const scriptPath = path.join(appPath, 'src', 'main.py');
 
-    const scriptPath = path.join(__dirname, 'main.py');
 
     // Exécute le script Python 'main.py' avec les arguments spécifiés
-    const pythonProcess = spawn('python', [scriptPath, `--name=${name}`, `--tool=${tool}`, `--result=${result}`, `--database=${database}`]);
+    const pythonPath = path.join(__dirname, '..', 'python', 'python.exe');
+    const pythonProcess = spawn(pythonPath, [scriptPath, `--tmp-path=${tmp_path}`, `--name=${name}`, `--tool=${tool}`, `--result=${result}`, `--database=${database}`]);
 
     // Initialise une variable pour stocker la sortie du terminal
     let terminalOutput = '';
@@ -102,11 +112,15 @@ const runPythonScriptGetCoverage = (data) => {
     const selectedProteinDescriptions = data.selectedProteinDescriptions || []; // Utilisez un tableau vide par défaut
     const tool = data.tool;
     const runID = data.runID;
-    const scriptPath = path.join(__dirname, 'main.py');
+    const appPath = app.getAppPath();
+    const scriptPath = path.join(appPath, 'src', 'main.py');
+    const pythonPath = path.join(__dirname, '..', 'python', 'python.exe');
+
 
     // Créez un tableau pour stocker les arguments
     const pythonArgs = [
       scriptPath,
+      `--tmp-path=${tmp_path}`,
       `--runID=${runID}`,
       `--tool=${tool}`,
     ];
@@ -117,7 +131,7 @@ const runPythonScriptGetCoverage = (data) => {
     });
 
     // Exécutez le script Python avec les arguments spécifiés
-    const pythonProcess = spawn('python', pythonArgs);
+    const pythonProcess = spawn(pythonPath, pythonArgs);
 
     // Initialisez une variable pour stocker la sortie du terminal
     let terminalOutput = '';
