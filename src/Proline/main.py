@@ -58,7 +58,7 @@ elif (args.runID):
         for proline_protein in proline.proteins:
             if proline_protein.description == protein_description:
                 found = True
-                proline_protein_transformed_id = proline_protein.id.replace('|', '##')
+                proline_protein_transformed_id = proline_protein.id.replace('|', '')
                 coverage_file = os.path.join(args.tmp_path, f"Proline_proteotrace_{args.runID}_{proline_protein_transformed_id}_coverage.txt")  # Utilisez le chemin absolu pour le fichier de couverture
                 proline_protein.get_sequence_coverage(coverage_file)
                 print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@IDENTIFIED=TRUE")

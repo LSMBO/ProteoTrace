@@ -196,7 +196,8 @@ function displayProteinSequence(proteinData, selectedProteinDescriptions) {
   const sequence_header_h2 = document.createElement('h2');
   sequenceContainer.appendChild(sequence_header_h2);
 
-  const sequenceElement = document.createElement('pre');
+  const sequenceElement = document.createElement('div');
+  sequenceElement.style.display = 'inline-block';
   sequenceElement.classList.add('coverage-sequence');
   sequenceContainer.appendChild(sequenceElement);
 
@@ -204,7 +205,7 @@ function displayProteinSequence(proteinData, selectedProteinDescriptions) {
   proteinSequencesContainer.appendChild(sequenceContainer);
 
   if (sequenceElement) {
-      sequenceContainer.style.display = 'block';
+      sequenceContainer.style.display = 'inline-block';
       let sequenceHTML = '';
       if (proteinData == null) {
           sequence_header_h2.textContent = `>${selectedProteinDescriptions}`;

@@ -56,7 +56,7 @@ elif (args.runID):
         for maxquant_protein in maxquant.proteins:
             if maxquant_protein.description == protein_description:
                 found = True
-                maxquant_protein_transformed_id = maxquant_protein.id.replace('|', '##')
+                maxquant_protein_transformed_id = maxquant_protein.id.replace('|', '')
                 coverage_file = os.path.join(args.tmp_path, f"Maxquant_proteotrace_{args.runID}_{maxquant_protein_transformed_id}_coverage.txt")
                 maxquant_protein.get_sequence_coverage(coverage_file)
                 print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@IDENTIFIED=TRUE")

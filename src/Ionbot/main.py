@@ -56,7 +56,7 @@ elif (args.runID):
         for ionbot_protein in ionbot.proteins:
             if ionbot_protein.description == protein_description:
                 found = True
-                ionbot_protein_transformed_id = ionbot_protein.id.replace('|', '##')
+                ionbot_protein_transformed_id = ionbot_protein.id.replace('|', '')
                 coverage_file=os.path.join(args.tmp_path, f"Ionbot_proteotrace_{args.runID}_{ionbot_protein_transformed_id}_coverage.txt")
                 ionbot_protein.get_sequence_coverage(coverage_file)
                 print(f"LOG=PROTEIN_ID={description_to_id(protein_description)}@@IDENTIFIED=TRUE")

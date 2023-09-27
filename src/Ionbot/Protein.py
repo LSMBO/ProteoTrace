@@ -60,27 +60,21 @@ class Protein:
         sequence = self.sequence
         coords = self.get_sequence_coverage_coordinates()
 
-        lines = []
-        for i in range(0, len(sequence), 80):
-            line_sequence = sequence[i:i + 80]
-            line_coverage = ""
-            for j in range(len(line_sequence)):
-                pos = i + j
-                if any(start <= pos <= end for start, end in coords):
-                    line_coverage += "+"
-                else:
-                    line_coverage += "-"
-            lines.append(line_sequence)
-            lines.append(line_coverage)
+        line_coverage = ""        
+        for i in range(len(sequence)):
+            if any(start <= i <= end for start, end in coords):
+                line_coverage += "+"
+            else:
+                line_coverage += "-"
 
-        fasta_str = f">{self.description}\n" + "\n".join(lines) + "\n"
+        fasta_str = f">{self.description}\n{sequence}\n{line_coverage}"
 
         if output_file:
             with open(output_file, "a") as f:
                 f.write(fasta_str)
         else:
             print(fasta_str)
-
+    
 
     def get_coverage_stats(self):
         sequence = self.sequence

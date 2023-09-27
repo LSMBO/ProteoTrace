@@ -274,7 +274,13 @@ button:hover {
     margin: 20px 15px;
     padding: 8px;
     border: 1px solid #fa4b3b;
+    word-wrap: break-word;
     display: none;
+}
+
+.coverage-sequence {
+    max-width: 100%;
+    margin: auto;
 }
 
 .coverage-sequence .identified {
