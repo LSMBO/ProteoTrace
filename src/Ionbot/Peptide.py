@@ -4,17 +4,17 @@ class Peptide:
         self.id = peptide_id
         self.file_psm_col_names = file_psm_col_names
         self.row = row
-        self.database_sequence = self.row[self.file_psm_col_names.index('database_peptide')]
-        self.matched_sequence = self.row[self.file_psm_col_names.index('matched_peptide')]
-        self.modifications = self.read_modifications(self.row[self.file_psm_col_names.index('modifications')])
+        self.database_sequence = self.row.iloc[self.file_psm_col_names.index('database_peptide')]
+        self.matched_sequence = self.row.iloc[self.file_psm_col_names.index('matched_peptide')]
+        self.modifications = self.read_modifications(self.row.iloc[self.file_psm_col_names.index('modifications')])
         self.length = len(self.database_sequence)
-        self.spectrum_title = self.row[self.file_psm_col_names.index('spectrum_title')]
-        self.spectrum_file = self.row[self.file_psm_col_names.index('spectrum_file')]     
+        self.spectrum_title = self.row.iloc[self.file_psm_col_names.index('spectrum_title')]
+        self.spectrum_file = self.row.iloc[self.file_psm_col_names.index('spectrum_file')]     
         self.proteins = self.search_proteins()
         
     def read_modifications(self, cell):
         modifications = []
-        if cell:
+        if isinstance(cell, str):
             entries = cell.split('|')
             for i in range(0, len(entries), 2):
                 mod_position = entries[i]

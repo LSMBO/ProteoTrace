@@ -22,7 +22,10 @@ class Ionbot:
     def get_protein_id_list(self, protein_description_list):
         id_list = []
         for desc in protein_description_list:
-            id_list.append(desc.split(' ')[0])
+            raw_id = desc.split(' ')[0]
+            if raw_id.startswith("sp|"):
+                raw_id = raw_id.split('|')[-1]
+            id_list.append(raw_id)
         return id_list
 
     def read_fasta(self, fasta_file):
